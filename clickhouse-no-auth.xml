@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<clickhouse>
+  <users>
+    <default>
+      <!-- Explicitly allow empty password for default user -->
+      <password></password>
+      <allow_empty_password>1</allow_empty_password>
+      <networks>
+        <!-- Allow connections from anywhere; adjust for production -->
+        <ip>::/0</ip>
+      </networks>
+      <profile>default</profile>
+      <quota>default</quota>
+    </default>
+  </users>
+</clickhouse>

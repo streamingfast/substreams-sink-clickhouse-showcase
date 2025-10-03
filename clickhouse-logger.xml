@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<clickhouse>
+  <logger>
+    <!-- Set to information to hide debug and trace logs -->
+    <level>information</level>
+    <!-- Keep logs on stdout/stderr so `docker logs` shows them -->
+    <console>true</console>
+  </logger>
+</clickhouse>
