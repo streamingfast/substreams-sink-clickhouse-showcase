@@ -1,0 +1,18 @@
+# substreams auth file
+.substreams.env
+
+# Compiled source files
+target/
+
+# Sink data when running any sinker
+sink-data/
+
+# The spkg packed by the subtreams cli
+*.spkg
+/.idea/.gitignore
+/.idea/modules.xml
+/.idea/protoeditor.xml
+/.idea/usdc_transfers.iml
+/transfers_schema_hash.txt
+/cursor.txt
+/.idea/

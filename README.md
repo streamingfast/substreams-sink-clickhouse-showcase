@@ -1,0 +1,1 @@
+# substreams-sink-clickhouse-showcase

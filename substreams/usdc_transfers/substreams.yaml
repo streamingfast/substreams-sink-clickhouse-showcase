@@ -1,0 +1,37 @@
+specVersion: v0.1.0
+package:
+  name: usdc_transfers
+  version: v0.1.0
+
+imports:
+    ethcommon: https://spkg.io/streamingfast/ethereum-common-v0.3.0.spkg
+
+protobuf:
+  files:
+    - contract.proto
+  descriptorSets:
+    - module: buf.build/streamingfast/substreams-sink-sql
+  importPaths:
+    - ./proto
+  excludePaths:
+    - sf/substreams
+    - google
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_transfer
+    kind: map
+    initialBlock: 6082465
+    blockFilter:
+      module: ethcommon:index_events
+      query:
+        string: evt_addr:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:contract.v1.Output
+network: mainnet

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "sf/substreams/sink/sql/schema/v1/schema.proto";
+
+package contract.v1;
+
+message Output {
+    repeated Transfer transfers =1;
+}
+
+message Transfer {
+    option (schema.table) = {
+        name: "transfers"
+        clickhouse_table_options: {
+            order_by_fields: [{name: "trx_hash"},  {name: "_block_number_"}, {name: "from"}, {name: "to"}]
+            partition_fields: [{name: "_block_timestamp_", function: toYYYYMM}]
+        }
+    };
+
+    string trx_hash = 1;
+    bytes from = 5;
+    bytes to = 6;
+    string amount = 7 [(schema.field) = { convertTo: { uint256{} } }];
+}
