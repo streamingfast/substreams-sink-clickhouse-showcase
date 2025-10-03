@@ -67,7 +67,7 @@ To run queries, exec into the container and use the native clickhouse-client. Fo
 docker exec -it clickehouse-showcase clickhouse-client --host 127.0.0.1
 ```
 
-After you've started the container and populated data (for example by running the substreams-sink-sql command above), you can execute the following query against ClickHouse to inspect monthly transfers:
+
 
 ``` sql
 SELECT 
