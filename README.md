@@ -2,6 +2,8 @@
 
 This repository provides a Docker image that runs a ClickHouse Server and also contains the `substreams-sink-sql` binary. To showcase how to use the `substreams-sink-sql from-proto`. We provide a simple example of a substreams package that produce data ready for ClickHouse database.
 
+#### Don't miss the deep dive: [Deep dive](./DEEP_DIVE.md)
+
 ### Building the image
 
 ``` shell script
