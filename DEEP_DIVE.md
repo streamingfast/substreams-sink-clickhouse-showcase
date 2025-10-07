@@ -76,10 +76,10 @@ This section explains how the protobuf annotations drive the ClickHouse schema g
 - The sink automatically adds block-related metadata columns and uses a `ReplacingMergeTree` engine to handle chain reorgs and late data.
 
 ### Automatically added metadata columns:
-- _block_number_ UInt64: the block number that produced the row.
-- _block_timestamp_ DateTime: the block timestamp.
-- _version_ Int64: a monotonically increasing value used by `ReplacingMergeTree` for deduplication/upserts.
-- _deleted_ Bool: logical `delete` flag used to express undo operations during reorgs. Queries can filter `WHERE _deleted_ = 0` for current rows, or use additive patterns (as shown in the materialized view) to account for both inserts and deletions.
+- `_block_number_` UInt64: the block number that produced the row.
+- `_block_timestamp_` DateTime: the block timestamp.
+- `_version_` Int64: a monotonically increasing value used by `ReplacingMergeTree` for deduplication/upserts.
+- `_deleted_` Bool: logical `delete` flag used to express undo operations during reorgs. Queries can filter `WHERE _deleted_ = 0` for current rows, or use additive patterns (as shown in the materialized view) to account for both inserts and deletions.
 
 For soft delete please see ClickHouse's [ReplacingMergeTree](https://clickhouse.com/docs/engines/table-engines/mergetree-family/replacingmergetree)
 
