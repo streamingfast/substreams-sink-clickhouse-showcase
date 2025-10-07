@@ -20,7 +20,7 @@ message Transfer {
     option (schema.table) = {
         name: "transfers"
         clickhouse_table_options: {
-            order_by_fields: [{name: "trx_hash"},  {name: "_block_number_"}, {name: "from"}, {name: "to"}]
+            order_by_fields: [{name: "trx_hash"},  {name: "_block_number_"}, {name: "log_index"}]
             partition_fields: [{name: "_block_timestamp_", function: toYYYYMM}]
         }
     };
