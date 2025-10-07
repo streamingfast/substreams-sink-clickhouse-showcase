@@ -25,6 +25,7 @@ fn map_transfer(blk: eth::Block) -> Result<contract::Output, substreams::errors:
                     if let Some(event) = abi::usdc_contract::events::Transfer::match_and_decode(log) {
                         return Some(contract::Transfer {
                             trx_hash: Hex(&view.transaction.hash).to_string(),
+                            log_index: log.index,
                             from: event.from,
                             to: event.to,
                             amount: event.value.to_string(),

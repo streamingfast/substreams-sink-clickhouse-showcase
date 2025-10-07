@@ -43,7 +43,7 @@ create table transfers._blocks_
     version   Int64,
     deleted   Bool
 )
-ENGINE = ReplacingMergeTree(version)
+ENGINE = ReplacingMergeTree(version, deleted)
 PARTITION BY toYYYYMM(timestamp)
 PRIMARY KEY number
 ORDER BY number
@@ -60,7 +60,7 @@ create table transfers.transfers
     to                String,
     amount            UInt256
 )
-ENGINE = ReplacingMergeTree(_version_)
+ENGINE = ReplacingMergeTree(_version_, _deleted_)
 PARTITION BY toYYYYMM(_block_timestamp_)
 ORDER BY (trx_hash, _block_number_, from, to)
 SETTINGS index_granularity = 8192;
@@ -80,6 +80,8 @@ This section explains how the protobuf annotations drive the ClickHouse schema g
 - _block_timestamp_ DateTime: the block timestamp.
 - _version_ Int64: a monotonically increasing value used by ReplacingMergeTree for deduplication/upserts.
 - _deleted_ Bool: logical delete flag used to express undo operations during reorgs. Queries can filter WHERE _deleted_ = 0 for current rows, or use additive patterns (as shown in the materialized view) to account for both inserts and deletions.
+
+For soft delete please see https://clickhouse.com/docs/engines/table-engines/mergetree-family/replacingmergetree
 
 ### Table engine and options from protobuf:
 - `option (schema.table).name = "transfers"`
@@ -129,9 +131,9 @@ CREATE MATERIALIZED VIEW transfers.monthly_transfers
     PARTITION BY month
     ORDER BY month
 AS
-SELECT 
+SELECT
     toYYYYMM(_block_timestamp_)                             AS month,
-    sum(if(_deleted_, -amount, amount)) AS volume,
+    sum(if(_deleted_, -toInt256(amount), toInt256(amount))) AS volume,
     sum(if(_deleted_, -1, 1))                               AS transfer_count
 FROM transfers.transfers
 GROUP BY month;
@@ -143,10 +145,10 @@ GROUP BY month;
 INSERT INTO transfers.monthly_transfers
 SELECT
     toYYYYMM(_block_timestamp_)                             AS month,
-    sum(if(_deleted_, -amount, amount)) AS volume,
+    sum(if(_deleted_, -toInt256(amount), toInt256(amount))) AS volume,
     sum(if(_deleted_, -1, 1))                               AS transfer_count
 FROM transfers.transfers
-GROUP BY month;      
+GROUP BY month;
 ```
 
 #### - Restart the substreams-sink-sql process
@@ -159,7 +161,12 @@ SELECT * FROM transfers.monthly_transfers FINAL;
 
 ## What is `transfers.monthly_transfers`?
 
-This materialized view stores pre-aggregated monthly metrics derived from the raw `transfers.transfers` table populated by `substreams-sink-sql`.
+### This work because ... 
+
+**Incremental population on inserts: The MV triggers only on new inserts to the source table (including delete markers where _deleted = true). It processes those inserts immediately, before any merges occur in the source.
+Netting out via negatives: By computing if(_deleted_, -toInt256(amount), toInt256(amount)) for the sum and if(_deleted_, -1, 1) for the count, the MV effectively adds positives for new/active transfers and subtracts the corresponding values for deletes. This nets out to the correct aggregate (e.g., a deleted transfer contributes 0 to both total and count).
+Independence from source merges: Merges in the source clean up duplicates/deletes for storage efficiency and FINAL queries, but they don't retroactively alter the MV's data. The MV's SummingMergeTree engine will sum the already-inserted positive/negative values correctly during its own merges.
+This materialized view stores pre-aggregated month  ly metrics derived from the raw `transfers.transfers` table populated by `substreams-sink-sql`.**
 
 What it contains:
 - One row per calendar month (format YYYYMM from `_block_timestamp_`).

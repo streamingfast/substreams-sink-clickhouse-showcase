@@ -13,12 +13,13 @@ message Transfer {
     option (schema.table) = {
         name: "transfers"
         clickhouse_table_options: {
-            order_by_fields: [{name: "trx_hash"},  {name: "_block_number_"}, {name: "from"}, {name: "to"}]
+            order_by_fields: [{name: "_block_number_"}, {name: "trx_hash"}, {name: "log_index"}]
             partition_fields: [{name: "_block_timestamp_", function: toYYYYMM}]
         }
     };
 
     string trx_hash = 1;
+    uint32 log_index = 2;
     bytes from = 5;
     bytes to = 6;
     string amount = 7 [(schema.field) = { convertTo: { uint256{} } }];

@@ -11,6 +11,8 @@ pub struct Output {
 pub struct Transfer {
     #[prost(string, tag="1")]
     pub trx_hash: ::prost::alloc::string::String,
+    #[prost(uint32, tag="2")]
+    pub log_index: u32,
     #[prost(bytes="vec", tag="5")]
     pub from: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes="vec", tag="6")]
